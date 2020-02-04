@@ -26,22 +26,22 @@ func (action Action_type) String() string {
 }
 
 type Reduction struct {
-	left  string
-	right []string
+	Left  string
+	Right []string
 }
 
 type Action struct {
-	action_type Action_type
-	reduction   Reduction
+	Action_type Action_type
+	Reduction   Reduction
 }
 
 type Table_element struct {
-	goto_table map[string]int
-	action     Action
+	Goto_table map[string]int
+	Action     Action
 }
 
 type Table struct {
-	table_elements []Table_element
+	Table_elements []Table_element
 }
 
 func Construct_lr0_Table(state_with_next_list []State_with_next, bnf_list []util.Bnf) Table {
@@ -49,7 +49,7 @@ func Construct_lr0_Table(state_with_next_list []State_with_next, bnf_list []util
 	table := Table{}
 
 	for _, state_with_next := range state_with_next_list {
-		table_element := Table_element{goto_table: state_with_next.Next}
+		table_element := Table_element{Goto_table: state_with_next.Next}
 
 		handlers := Get_handlers(state_with_next, bnf_list)
 		if len(handlers) > 0 {
@@ -57,16 +57,16 @@ func Construct_lr0_Table(state_with_next_list []State_with_next, bnf_list []util
 				fmt.Printf("reduction conflicts")
 			}
 			handler := handlers[0]
-			reduction := Reduction{left: bnf_list[handler.Product_id].Left, right: bnf_list[handler.Product_id].Right[handler.Alternate_id]}
-			action := Action{action_type: Reduce, reduction: reduction}
+			reduction := Reduction{Left: bnf_list[handler.Product_id].Left, Right: bnf_list[handler.Product_id].Right[handler.Alternate_id]}
+			action := Action{Action_type: Reduce, Reduction: reduction}
 
-			table_element.action = action
+			table_element.Action = action
 		} else {
-			action := Action{action_type: Shift}
-			table_element.action = action
+			action := Action{Action_type: Shift}
+			table_element.Action = action
 		}
 
-		table.table_elements = append(table.table_elements, table_element)
+		table.Table_elements = append(table.Table_elements, table_element)
 	}
 
 	return table
@@ -77,7 +77,7 @@ func (table *Table) Print_lr0_table(bnf_list []util.Bnf) {
 	ascii_table := ascii_graph.Table2d{}
 	col_p := []string{}
 
-	for i := 0; i < len(table.table_elements); i++ {
+	for i := 0; i < len(table.Table_elements); i++ {
 		col_p = append(col_p, strconv.Itoa(i))
 	}
 	nonterminal_and_terminal := util.Get_nonterminal_and_terminal(bnf_list)
@@ -86,10 +86,10 @@ func (table *Table) Print_lr0_table(bnf_list []util.Bnf) {
 		row_p = append(row_p, term)
 	}
 	data := [][]string{}
-	for i, table_ele := range table.table_elements {
+	for i, table_ele := range table.Table_elements {
 		data = append(data, []string{})
 		for _, term := range row_p {
-			if index, ok := table_ele.goto_table[term]; ok {
+			if index, ok := table_ele.Goto_table[term]; ok {
 				data[i] = append(data[i], strconv.Itoa(index))
 			} else {
 				data[i] = append(data[i], " ")
@@ -99,14 +99,14 @@ func (table *Table) Print_lr0_table(bnf_list []util.Bnf) {
 	}
 
 	row_p = append(row_p, "Action")
-	for i, table_ele := range table.table_elements {
-		action := table_ele.action.action_type.String()
-		if len(table_ele.action.reduction.left) > 0 {
+	for i, table_ele := range table.Table_elements {
+		action := table_ele.Action.Action_type.String()
+		if len(table_ele.Action.Reduction.Left) > 0 {
 			action = action + " "
 
-			action = action + table_ele.action.reduction.left
+			action = action + table_ele.Action.Reduction.Left
 			action = action + "->"
-			for _, red := range table_ele.action.reduction.right {
+			for _, red := range table_ele.Action.Reduction.Right {
 				action = action + red
 			}
 		}

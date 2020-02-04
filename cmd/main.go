@@ -19,6 +19,6 @@ func main() {
 
 	table.Print_lr0_table(bnf_list)
 	start := generator.Parse_lr0(table, []string{"Int", "+", "Int", ";"}, bnf_list)
-	generator.PrintTree(start, "")
+	generator.PrintTree(start, "", true)
 
 }

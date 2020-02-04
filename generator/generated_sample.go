@@ -6,51 +6,57 @@ import "fmt"
 // generated code
 //----------------------------
 
-func PrintTree(node ParserNode, indent string) {
+func PrintTree(node ParserNode, indent string, last bool) {
+	fmt.Printf(indent)
+	if last {
+		fmt.Printf("\\-")
+		indent = indent + " "
+	} else {
+		fmt.Printf("|-")
+		indent = indent + "| "
+	}
 
 	if s_node, ok := node.(S); ok {
-		fmt.Printf(indent)
-		fmt.Printf("|-")
 		fmt.Println("S")
 		if s_node.E != nil {
-			indent = indent + "| "
-			PrintTree(*s_node.E, indent)
+			indent = indent + " "
+			PrintTree(*s_node.E, indent, true)
 		}
 	}
 
 	if s_node, ok := node.(E); ok {
-
-		fmt.Printf(indent)
-		fmt.Printf("|-")
 		fmt.Println("E")
 		if s_node.T != nil {
-			PrintTree(*s_node.T, indent+"| ")
+			if s_node.E == nil {
+				PrintTree(*s_node.T, indent, true)
+			} else {
+				PrintTree(*s_node.T, indent, false)
+			}
 		}
 		if s_node.E != nil {
-			PrintTree(*s_node.E, indent+"| ")
+			PrintTree(*s_node.E, indent, true)
 		}
 	}
 
 	if s_node, ok := node.(T); ok {
-		fmt.Printf(indent)
-		fmt.Printf("|-")
 		fmt.Println("T")
 
 		if s_node.E != nil {
-			PrintTree(*s_node.E, indent+"| ")
+			if s_node.Int == nil {
+				PrintTree(*s_node.E, indent, true)
+			} else {
+				PrintTree(*s_node.E, indent, false)
+			}
 		}
 		if s_node.Int != nil {
-			PrintTree(*s_node.Int, indent+"| ")
+			PrintTree(*s_node.Int, indent, true)
 		}
 	}
 
 	if s_node, ok := node.(Terminal); ok {
-		fmt.Printf(indent)
-		fmt.Printf("|-")
 		fmt.Println("Terminal")
 
 		if s_node.Value != "" {
-			indent = indent + "| "
 			fmt.Printf(indent)
 			fmt.Printf("|-")
 			fmt.Println(s_node.Value)

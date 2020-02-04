@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/KazumaTakata/lr_parser/cmd/lr0"
 	"github.com/KazumaTakata/lr_parser/generator"
 	"path/filepath"
@@ -20,7 +18,7 @@ func main() {
 	table := lr0.Construct_lr0_Table(automaton_states, bnf_list)
 
 	table.Print_lr0_table(bnf_list)
-	stack := generator.Parse_lr0(table, []string{"Int", "+", "Int", ";"}, bnf_list)
-	fmt.Printf("%+v", stack)
+	start := generator.Parse_lr0(table, []string{"Int", "+", "Int", ";"}, bnf_list)
+	generator.PrintTree(start, "")
 
 }

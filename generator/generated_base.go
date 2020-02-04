@@ -53,7 +53,7 @@ type node struct {
 	children  []node
 }
 
-func Parse_lr0(table lr0.Table, input_tokens []string, bnf_list []util.Bnf) symbol_stack {
+func Parse_lr0(table lr0.Table, input_tokens []string, bnf_list []util.Bnf) S {
 
 	state_stack := state_stack{}
 	symbol_stack := symbol_stack{}
@@ -67,7 +67,11 @@ func Parse_lr0(table lr0.Table, input_tokens []string, bnf_list []util.Bnf) symb
 		handle_reduction(table, next_state_id, bnf_list, &symbol_stack, &state_stack)
 	}
 
-	return symbol_stack
+	remaining_symbol := symbol_stack.top()
+
+	s_symbol, _ := remaining_symbol.(S)
+
+	return s_symbol
 
 }
 func handle_reduction(table lr0.Table, next_state_id int, bnf_list []util.Bnf, symbol_stack *symbol_stack, state_stack *state_stack) {
@@ -85,7 +89,7 @@ func handle_reduction(table lr0.Table, next_state_id int, bnf_list []util.Bnf, s
 		for i := len(right) - 1; i >= 0; i-- {
 			poped := symbol_stack.pop()
 			if poped.String() == right[i] {
-				root_node = ContructParserNode(root_node, right[i])
+				root_node = ContructParserNode(root_node, right[i], poped)
 				//root_node.children = append([]node{poped}, root_node.children...)
 				state_stack.pop()
 			} else {

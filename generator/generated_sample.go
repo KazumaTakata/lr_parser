@@ -6,13 +6,14 @@ import "fmt"
 // generated code
 //----------------------------
 
+//https://stackoverflow.com/a/1649223/4624070
 func PrintTree(node ParserNode, indent string, last bool) {
 	fmt.Printf(indent)
 	if last {
-		fmt.Printf("\\-")
+		fmt.Printf("+-")
 		indent = indent + " "
 	} else {
-		fmt.Printf("|-")
+		fmt.Printf("+-")
 		indent = indent + "| "
 	}
 
@@ -58,7 +59,7 @@ func PrintTree(node ParserNode, indent string, last bool) {
 
 		if s_node.Value != "" {
 			fmt.Printf(indent)
-			fmt.Printf("|-")
+			fmt.Printf("+-")
 			fmt.Println(s_node.Value)
 		}
 	}

@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"path/filepath"
-	//	"remove_left_recursion/ll"
+	"github.com/KazumaTakata/ascii_graph"
 	"github.com/KazumaTakata/lr_parser/cmd/lr0"
 	"github.com/KazumaTakata/lr_parser/util"
+	"path/filepath"
 	"runtime"
+	"strconv"
 	//	"strings"
 )
 
@@ -17,6 +18,15 @@ const (
 	Accept Action_type = 1
 	Reduce Action_type = 2
 )
+
+func (action Action_type) String() string {
+	actions := []string{
+		"Shift",
+		"Accrpt",
+		"Reduce"}
+
+	return actions[action]
+}
 
 type Reduction struct {
 	left  string
@@ -67,35 +77,49 @@ func Construct_lr0_Table(state_with_next_list []lr0.State_with_next, bnf_list []
 
 func Print_lr0_table(table Table, bnf_list []util.Bnf) {
 
-	fmt.Printf("------------------------\n")
+	ascii_table := ascii_graph.Table2d{}
+	col_p := []string{}
 
+	for i := 0; i < len(table.table_elements); i++ {
+		col_p = append(col_p, strconv.Itoa(i))
+	}
 	nonterminal_and_terminal := util.Get_nonterminal_and_terminal(bnf_list)
-	terms := []string{}
+	row_p := []string{}
 	for term, _ := range nonterminal_and_terminal {
-		terms = append(terms, term)
+		row_p = append(row_p, term)
 	}
-
-	fmt.Printf(" ")
-	for _, term := range terms {
-		fmt.Printf(" %v  ", term)
-	}
-
-	fmt.Printf("\n")
-
+	data := [][]string{}
 	for i, table_ele := range table.table_elements {
-
-		fmt.Printf("%d", i)
-
-		for _, term := range terms {
+		data = append(data, []string{})
+		for _, term := range row_p {
 			if index, ok := table_ele.goto_table[term]; ok {
-				fmt.Printf(" %v ", index)
+				data[i] = append(data[i], strconv.Itoa(index))
 			} else {
-				fmt.Printf("    ")
+				data[i] = append(data[i], " ")
 			}
 
 		}
-		fmt.Printf("\n")
 	}
+
+	row_p = append(row_p, "Action")
+	for i, table_ele := range table.table_elements {
+		action := table_ele.action.action_type.String()
+		if len(table_ele.action.reduction.left) > 0 {
+			action = action + " "
+
+			action = action + table_ele.action.reduction.left
+			action = action + "<-"
+			for _, red := range table_ele.action.reduction.right {
+				action = action + red
+			}
+		}
+		data[i] = append(data[i], action)
+	}
+	ascii_table.SetColumnProperty(col_p)
+	ascii_table.SetRowProperty(row_p)
+	ascii_table.SetData(data)
+
+	ascii_table.Draw()
 
 }
 

@@ -66,6 +66,15 @@ func PrintTree(node ParserNode, indent string, last bool) {
 
 }
 
+func PrettyPrint(node ParserNode) {
+	fmt.Printf("------------------\n")
+	fmt.Printf("Parsed Tree\n")
+	fmt.Printf("------------------\n")
+	PrintTree(node, "", true)
+	fmt.Printf("------------------\n")
+	fmt.Printf("------------------\n")
+}
+
 type S struct {
 	E *E
 }

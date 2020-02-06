@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/KazumaTakata/go_code_generator"
 	"github.com/KazumaTakata/lr_parser/util"
+	"github.com/KazumaTakata/regex_virtualmachine"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -26,10 +27,14 @@ func CreateStruct(bnf_list []util.Bnf) []generator.Struct {
 		}
 
 		for right_ele, _ := range right_set {
-			if _, ok := nonterminals[right_ele]; ok {
-				struct_element = append(struct_element, generator.StructElement{Name: right_ele, Type: "*" + right_ele})
-			} else {
-				struct_element = append(struct_element, generator.StructElement{Name: right_ele, Type: "*Terminal"})
+			regex := regex.NewRegex("[a-zA-Z_]+")
+			if match, ifmatch := regex.Match("0034"); ifmatch {
+
+				if _, ok := nonterminals[right_ele]; ok {
+					struct_element = append(struct_element, generator.StructElement{Name: right_ele, Type: "*" + right_ele})
+				} else {
+					struct_element = append(struct_element, generator.StructElement{Name: right_ele, Type: "*Terminal"})
+				}
 			}
 		}
 
@@ -43,6 +48,18 @@ func CreateStruct(bnf_list []util.Bnf) []generator.Struct {
 	return structs
 }
 
+func CreateNestedIf(bnf util.Bnf) []generator.Statement {
+	nested_ifstatement := []generator.Statement{}
+	for _, right := range bnf.Right {
+		for _, right_ele := range right {
+			body := generator.Statement{IfStatement: &generator.IfStatement{BoolExpression: &generator.BooleanExpression{Left: "right", Right: right_ele}}}
+			nested_ifstatement = append(nested_ifstatement, body)
+		}
+	}
+
+	return nested_ifstatement
+}
+
 func CreateFunction(bnf_list []util.Bnf) []generator.Function {
 	functions := []generator.Function{}
 
@@ -54,11 +71,13 @@ func CreateFunction(bnf_list []util.Bnf) []generator.Function {
 
 	for i, bnf := range bnf_list {
 		if i == 0 {
-			rootifstatement = &generator.IfStatement{BoolExpression: &generator.BooleanExpression{Left: "root.String()", Right: bnf.Left}}
+			nested_ifstatement := CreateNestedIf(bnf)
+			rootifstatement = &generator.IfStatement{BoolExpression: &generator.BooleanExpression{Left: "root.String()", Right: bnf.Left}, Body: nested_ifstatement}
 			ifstatement = rootifstatement
 		} else {
-			newifstatement := &generator.IfStatement{BoolExpression: &generator.BooleanExpression{Left: "root.String()", Right: bnf.Left}}
 
+			nested_ifstatement := CreateNestedIf(bnf)
+			newifstatement := &generator.IfStatement{BoolExpression: &generator.BooleanExpression{Left: "root.String()", Right: bnf.Left}, Body: nested_ifstatement}
 			ifstatement.Else = newifstatement
 			ifstatement = newifstatement
 		}
@@ -87,6 +106,12 @@ func main() {
 
 	package_temp := generator.Package{Name: "generator", Structs: structs, Functions: functions}
 
-	generator.Execute(os.Stdout, package_temp)
+	f, err := os.Create("generated/sample.go")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	generator.Execute(f, package_temp)
 
 }
